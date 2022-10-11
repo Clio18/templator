@@ -16,8 +16,8 @@ class ClassPathTemplateFactoryITest {
 
     @Test
     @DisplayName("test ClassPathTemplateFactory GetPage From Template And ParamsMap")
-    void testClassPathTemplateFactoryGetPageFromTemplateAndParamsMap(){
-        ClassPathTemplateFactory classPathTemplateFactory = new ClassPathTemplateFactory("src/test/resources/templates/");
+    void testClassPathTemplateFactoryGetPageFromTemplateAndParamsMap() {
+        ClassPathTemplateFactory classPathTemplateFactory = new ClassPathTemplateFactory("templates");
         String str = "2016-03-04 11:30";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
@@ -65,14 +65,13 @@ class ClassPathTemplateFactoryITest {
 
     @Test
     @DisplayName("test ClassPathTemplateFactory GetPage From Template And WithOut ParamsMap")
-    void testClassPathTemplateFactoryGetPageFromTemplateAndWithOutParamsMap(){
-        ClassPathTemplateFactory classPathTemplateFactory = new ClassPathTemplateFactory("src/test/resources/templates/");
+    void testClassPathTemplateFactoryGetPageFromTemplateAndWithOutParamsMap() {
+        ClassPathTemplateFactory classPathTemplateFactory = new ClassPathTemplateFactory("templates");
         String page = classPathTemplateFactory.getPage("login.html");
         assertNotNull(page);
-        assertTrue(page.contains("<head>"));
-        assertTrue(page.contains("</head>"));
-        assertTrue(page.contains("<title>"));
-        assertTrue(page.contains("</title>"));
+        assertTrue(page.contains("head"));
+        assertTrue(page.contains("title"));
+        assertTrue(page.contains("sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"));
     }
 
 

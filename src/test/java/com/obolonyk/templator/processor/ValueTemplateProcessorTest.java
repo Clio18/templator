@@ -71,7 +71,6 @@ class ValueTemplateProcessorTest {
                 .description("Good toy")
                 .build();
 
-
         String[] fieldsNameProduct = new String[]{"product"};
         String[] fieldsNameCreationDate = new String[]{"product", "creationDate"};
         String[] fieldsNameMonth = new String[]{"product", "creationDate", "month"};
@@ -88,5 +87,28 @@ class ValueTemplateProcessorTest {
         assertEquals(dateTime, creationDate);
         assertEquals(dateTime.getMonth(), month);
         assertEquals(dateTime.getMonth().getValue(), monthCount);
+    }
+
+    @Test
+    @DisplayName("test ValueTemplateProcessor Avoid XSS Injection")
+    void testValueTemplateProcessorAvoidXSSInjection() {
+        String template = """
+                 <div class="container">
+                        </div>                        
+                        <button type="submit" class="btn btn-info" style="width: 80px">
+                                                        Cart ${count}
+                                                    </button>                             
+                        <div class="container">
+                        </div>
+                """;
+        Map<String, Object> params = new HashMap<>();
+        String count = "<>7</>";
+        params.put("count", count);
+
+        ValueTemplateProcessor valueTemplateProcessor = new ValueTemplateProcessor();
+        String resultTemplate = valueTemplateProcessor.process(template, params);
+        assertTrue(resultTemplate.contains("7"));
+        assertFalse(resultTemplate.contains("<>"));
+        assertFalse(resultTemplate.contains("</>"));
     }
 }

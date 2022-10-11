@@ -4,8 +4,11 @@ import com.obolonyk.templator.reflection.ReflectionHelper;
 
 import java.util.*;
 import java.util.regex.Pattern;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 
+@Slf4j
 public class ValueTemplateProcessor implements TemplateProcessor {
     private static final Pattern VALUE_PREFIX = Pattern.compile("\\$\\{");
     private static final Pattern VALUE_SUFFIX = Pattern.compile("\\}");
@@ -13,7 +16,9 @@ public class ValueTemplateProcessor implements TemplateProcessor {
 
     @Override
     public String process(String template, Map<String, Object> params) {
+        log.trace("Starting ValueTemplateProcessor processing");
         if (params.isEmpty()) {
+            log.trace("ValueTemplateProcessor finished processing: params value was empty");
             return template;
         }
         List<String> paramsFromTemplate = new ArrayList<>();
@@ -40,12 +45,13 @@ public class ValueTemplateProcessor implements TemplateProcessor {
             String replace = StringEscapeUtils.escapeHtml4(value.toString());
             template = template.replace(forReplace, replace);
         }
+        log.trace("ValueTemplateProcessor finished processing: template was updated");
         return template;
     }
 
-    //TODO: test
     //in case if getter returns the object and another getter will call
     Object processGetterChain(Object object, String[] fieldsName) {
+        log.trace("ValueTemplateProcessor: processing with getters chain");
         Object currentValue = object;
         //avoid first field name, because it is already our object
         for (int i = 1; i < fieldsName.length; i++) {

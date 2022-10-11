@@ -5,8 +5,10 @@ import com.obolonyk.templator.reflection.ReflectionHelper;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 
+@Slf4j
 public class ForEachTemplateProcessor implements TemplateProcessor {
     private static final Pattern VALUE_PREFIX = Pattern.compile("\\$\\{");
     private static final Pattern VALUE_SUFFIX = Pattern.compile("\\}");
@@ -17,7 +19,9 @@ public class ForEachTemplateProcessor implements TemplateProcessor {
 
     @Override
     public String process(String template, Map<String, Object> params) {
+        log.trace("Starting ForEachTemplateProcessor processing");
         if (params.isEmpty()) {
+            log.trace("ForEachTemplateProcessor finished processing: params value was empty");
             return template;
         }
         List<String> forEachItemsPieces = getForEachItems(template);
@@ -42,10 +46,12 @@ public class ForEachTemplateProcessor implements TemplateProcessor {
                 template = template.replace(forReplace, stringBuilder.toString());
             }
         }
+        log.trace("ForEachTemplateProcessor finished processing: template was updated");
         return template;
     }
 
     private String fillTemplate(Object object, String template) {
+        log.trace("ForEachTemplateProcessor: filling template by repeated pieces");
         List<String> paramsFromTemplate = new ArrayList<>();
         String[] splitStart = VALUE_PREFIX.split(template);
         for (int i = 1; i < splitStart.length; i++) {
@@ -55,19 +61,17 @@ public class ForEachTemplateProcessor implements TemplateProcessor {
 
         for (String paramFromTemplate : paramsFromTemplate) {
             String[] split = VALUE_DOT.split(paramFromTemplate);
-
+            String forReplace = "${" + paramFromTemplate + "}";
+            Object replace;
             if (split.length == 1) {
-                String forReplace = "${" + paramFromTemplate + "}";
-                String replace = StringEscapeUtils.escapeHtml4(object.toString());
-                template = template.replace(forReplace, replace);
-
+                replace = object;
             } else {
-                Object newObj = getObject(object, split);
-                String forReplace = "${" + paramFromTemplate + "}";
-                String replace = StringEscapeUtils.escapeHtml4(newObj.toString());
-                template = template.replace(forReplace, replace);
+                replace = getObject(object, split);
             }
+            String replaceString = StringEscapeUtils.escapeHtml4(replace.toString());
+            template = template.replace(forReplace, replaceString);
         }
+        log.trace("ForEachTemplateProcessor: template was filled");
         return template;
     }
 

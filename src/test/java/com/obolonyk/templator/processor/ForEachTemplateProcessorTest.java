@@ -66,4 +66,42 @@ class ForEachTemplateProcessorTest {
         assertTrue(resultTemplate.contains("Batman"));
         assertTrue(resultTemplate.contains("Best toy"));
     }
+
+    @Test
+    @DisplayName("test ForEachTemplateProcessor Avoid XSS Injection")
+    void testForEachTemplateProcessorAvoidXSSInjection() {
+        String template = """
+                  <#foreach product in products>
+                            <tr>
+                                <td>${product.name}</td>
+                                <td>${product.description}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <div style="margin-right: 20px">
+                                            <form action="/products/update" method="get">
+                                                <input type="hidden" name="id" value="${product.id}">
+                                                <button type="submit" class="btn btn btn-warning" style="width: 80px">Update</button>
+                                            </form>
+                                        </div>
+                                </td>
+                             </tr>    
+                  </#foreach>       
+                """;
+
+        Product product1 = Product.builder()
+                .id(1L)
+                .name("<>Teddy Bear</>")
+                .description("& Good toy &")
+                .build();
+
+        List<Product> products = List.of(product1);
+        Map<String, Object> params = new HashMap<>();
+        params.put("products", products);
+
+        ForEachTemplateProcessor forEachTemplateProcessor = new ForEachTemplateProcessor();
+        String resultTemplate = forEachTemplateProcessor.process(template, params);
+        assertFalse(resultTemplate.contains("<>"));
+        assertFalse(resultTemplate.contains("</>"));
+        assertFalse(resultTemplate.contains("& "));
+    }
 }
